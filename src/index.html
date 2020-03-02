@@ -42,6 +42,16 @@
             </table>
             <hr>
             <br>
+
+            <form id="form-hide" onSubmit="App.castVote(); return false;">
+              <div class="form-group">
+                <label for="candidatesSelect">Select Candidate: </label>
+                <select id="candidatesSelect" class="from-control"></select>
+              </div>
+              <button type="submit" class="btn btn-primary">Vote</button>
+              <hr>
+              <br>
+            </form>
             <p class="text-center" id="accountAddress"></p>
           </div>
         </div>

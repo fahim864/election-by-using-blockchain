@@ -35,7 +35,12 @@ App = {
     content.hide();
     
     //Load Account Details
-        
+    web3.eth.getCoinbase((err, res) => {
+      if (err === null) {
+        App.account = res;
+        $("#accountAddress").html("Your account: " + res);
+      }
+    })
 
     //Load contract data and Account
     App.contracts.Election.deployed().then(function(i){
@@ -45,8 +50,8 @@ App = {
       var candidatesResult = $('#candidatesResults');
       candidatesResult.empty();
 
-      $('#accountAddress').html("Your Account: "+ electionInstance.address);
-
+      var candidatesSelect = $('#candidatesSelect');
+      candidatesSelect.empty();
       for(var i = 1; i<=candidatesCount; i++){
         electionInstance.candidates(i).then(function(candidate){
           var id = candidate[0];
@@ -55,14 +60,37 @@ App = {
 
           var candidateTemplate = "<tr><th>"+id+"</th><th>"+name+"</th><th>"+voteCount+"</th></tr>";
           candidatesResult.append(candidateTemplate);
+
+          var candidateOption = "<option value='"+id+"' >"+name+"</option>";
+          candidatesSelect.append(candidateOption);
         });
       }
+      return electionInstance.voters(App.account);
+    }).then(function(hasVoted){
 
+      if(hasVoted){
+        $('#form-hide').hide();
+      }
       loader.hide();
-      content.show()
+      content.show();
     }).catch(function(error){
       console.warn(error);
     })
+  },
+
+  castVote: function(){
+    var loader = $("#loader");
+    var content = $("#content");
+    var candidateId = $('#candidatesSelect').val();
+    App.contracts.Election.deployed().then(function(i){
+      return i.vote(candidateId, { from:App.account });
+    }).then(function(result){
+      loader.show();
+      content.hide();
+      window.location.reload();
+    }).catch(function(err){
+      console.error(err);
+    });
   }
   
 
